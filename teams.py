@@ -10,6 +10,7 @@ class teams:
 
 	@commands.command(pass_context=True)
 	async def teamgen(self, ctx):
+		#just a random comment yo
 		"""This generates the teams"""
 		players = [member.name for member in ctx.message.author.voice_channel.voice_members]
 		random.shuffle(players)
