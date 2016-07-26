@@ -21,4 +21,4 @@ class teams:
 		
 
 def setup(bot):
-	bot.add_cog(teams(bot))aa
+	bot.add_cog(teams(bot))
