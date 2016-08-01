@@ -4,6 +4,7 @@ from random import randint
 from random import choice as randchoice
 from .utils.dataIO import fileIO
 from .utils import checks
+import re
 import datetime
 import time
 import os
@@ -17,6 +18,8 @@ class LFG:
         self.timer_NA = int(time.perf_counter())
         self.timer_EU = int(time.perf_counter())
         self.timer_PTR = int(time.perf_counter())
+
+        self.previous_author = None
 
     @commands.group(pass_context = True)
     @checks.mod_or_permissions(administrator = True, moderator = True)
@@ -48,7 +51,7 @@ class LFG:
         await self.bot.say("Timer reset for region {}".format(region_name))
 
     @commands.command(pass_context = True)
-    async def lfg(self, ctx, region_name : str, user : discord.Member = None):
+    async def lfg(self, ctx, region_name, *text):
         self.server_id = "184694956131221515"
         self.server = self.bot.get_server(self.server_id)
 
@@ -56,55 +59,63 @@ class LFG:
         self.NA_role = discord.utils.get(self.server.roles, name='NA')
         self.PTR_role = discord.utils.get(self.server.roles, name='PTR')
         
+        user = [x for x in text if "@" in x]
+        if user:
+            user = discord.utils.get(ctx.message.server.members, name = user)
+
         author = ctx.message.author
         if not user:
             user = author
+
         author_roles = [x.name for x in author.roles if x.name != "@everyone"]
         roles = [x.name for x in user.roles if x.name != "@everyone"]
 
-        if "NA" in region_name:
+        if "na" in region_name.lower():
             if self.settings["PING_TIMEOUT"] <= abs(abs(self.timer_NA - int(time.perf_counter()))) or ("moderator" in author_roles or "admin" in author_roles):
                 await self.bot.edit_role(self.server, self.NA_role, mentionable = True)
                 self.timer_NA = int(time.perf_counter())
                 msg = "{} is pinging the {} group! ".format(user.mention, self.NA_role.mention)
+                self.previous_author = user 
                 await self.bot.say(msg)
                 await self.bot.edit_role(self.server, self.NA_role, mentionable = False)
 
             else:
                 time_val = (self.settings["PING_TIMEOUT"] - abs(abs(self.timer_NA - int(time.perf_counter()))))/60.
-                msg = "Sorry {}, someone has pinged recently. Please wait {} minutes before attempting another ping for {} ".format(user.mention, str(time_val)[:3], self.NA_role)
+                msg = "Sorry {}, {} has pinged recently. Please wait {} minutes before attempting another ping for {} ".format(user.mention, self.previous_author, str(time_val)[:3], self.NA_role)
                 await self.bot.say(msg)
 
-        elif "EU" in region_name:
+        elif "eu" in region_name.lower():
             if self.settings["PING_TIMEOUT"] <= abs(abs(self.timer_EU - int(time.perf_counter()))) or ("moderator" in author_roles or "admin" in author_roles):
                 await self.bot.edit_role(self.server, self.EU_role, mentionable = True)
                 self.timer_EU = int(time.perf_counter())
                 msg = "{} is pinging the {} group! ".format(user.mention, self.EU_role.mention)
+                self.previous_author = user 
                 await self.bot.say(msg)
                 await self.bot.edit_role(self.server, self.EU_role, mentionable = False)
 
             else:
                 time_val = (self.settings["PING_TIMEOUT"] - abs(abs(self.timer_EU - int(time.perf_counter()))))/60.
-                msg = "Sorry {}, someone has pinged recently. Please wait {} minutes before attempting another ping for {}  ".format(user.mention, str(time_val)[:4], self.EU_role)
+                msg = "Sorry {}, {} has pinged recently. Please wait {} minutes before attempting another ping for {}  ".format(user.mention, self.previous_author, str(time_val)[:4], self.EU_role)
                 await self.bot.say(msg)
 
-        elif "PTR" in region_name:
+        elif "ptr" in region_name.lower():
             if self.settings["PING_TIMEOUT"] <= abs(abs(self.timer_PTR - int(time.perf_counter()))) or ("moderator" in author_roles or "admin" in author_roles):
                 await self.bot.edit_role(self.server, self.PTR_role, mentionable = True)
                 self.timer_PTR = int(time.perf_counter())
                 msg = "{} is pinging the {} group! ".format(user.mention, self.PTR_role.mention)
+                self.previous_author = user 
                 await self.bot.say(msg)
                 await self.bot.edit_role(self.server, self.PTR_role, mentionable = False)
 
             else:
                 time_val = (self.settings["PING_TIMEOUT"] - abs(abs(self.timer_PTR - int(time.perf_counter()))))/60.
-                msg = "Sorry {}, someone has pinged recently. Please wait {} minutes before attempting another ping for {}  ".format(user.mention, str(time_val)[:4], self.PTR_role)
+                msg = "Sorry {}, {} has pinged recently. Please wait {} minutes before attempting another ping for {}  ".format(user.mention, self.previous_author, str(time_val)[:4], self.PTR_role)
                 await self.bot.say(msg)
 
-        elif "FuckTown" in region_name:
+        elif "fucktown" in region_name.lower():
             await self.bot.say("Welcome to {}'s palace of pleasure {}".format(self.server.get_member("106811559354830848").mention, author.mention))
         else:
-            msg = "{} is not a pingable role, try: EU, NA or PTR instead (case sensitive)".format(region_name)
+            msg = "{} is not a pingable role, try: EU, NA or PTR instead".format(region_name)
             return await self.bot.say(msg)
 
 
