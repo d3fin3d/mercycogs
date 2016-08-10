@@ -32,7 +32,7 @@ class countrycode:
             except AttributeError:
                 await self.bot.say("w00ps, something went wrong! :( Please try again.")
         else:
-            await self.bot.say("Sorry I don't know your country! Did you use the correct ISO countrycode?")
+            await self.bot.say("Sorry I don't know your country! Did you use the correct ISO countrycode?\nExample: `-addcounty GB`")
 
     @commands.command(pass_context=True, no_pm=True)
     async def removecountry(self, ctx, country: str):
@@ -55,7 +55,7 @@ class countrycode:
                 else:
                     await self.bot.say("You already removed that country as your country origin!")
             else:
-                await self.bot.say("Sorry I don't know your country! Did you use the correct ISO countrycode?")
+                await self.bot.say("Sorry I don't know your country! Did you use the correct ISO countrycode?\nExample: `-addcounty GB`")
         except:
             await self.bot.say("w00ps, something went wrong! :( (Module: Countrycode)")
 
