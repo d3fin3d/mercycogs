@@ -94,7 +94,7 @@ class Karma:
         log.debug("Scores:\n\t{}".format(scores))
         headers = ["User", "Karma"]
         body = sorted(zip(names, scores), key=lambda tup: tup[1],
-                      reverse=True)[:26]
+                      reverse=True)[:25]
         table = tabulate.tabulate(body, headers, tablefmt="psql")
         await self.bot.say(box(table))
 
