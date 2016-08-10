@@ -1,5 +1,3 @@
-
-
 import discord
 import requests
 from discord.ext import commands
@@ -11,7 +9,6 @@ class countrycode:
         self.bot = bot
 
     @commands.command(pass_context=True, no_pm=True)
-    @checks.admin_or_permissions(manage_roles=True)
     async def addcountry(self, ctx, country: str):
 
         server = ctx.message.server
@@ -31,14 +28,13 @@ class countrycode:
                     await self.bot.add_roles(user, role)
                     await self.bot.say("Greetings from " + result['name'] + " by " + user.mention)
                 else:
-                    await self.bot.say("You already set your countryorigin to that country!")
+                    await self.bot.say("You already set your country origin to that country!")
             except AttributeError:
                 await self.bot.say("w00ps, something went wrong! :( Please try again.")
         else:
             await self.bot.say("Sorry I don't know your country! Did you use the correct ISO countrycode?")
 
     @commands.command(pass_context=True, no_pm=True)
-    @checks.admin_or_permissions(manage_roles=True)
     async def removecountry(self, ctx, country: str):
 
         server = ctx.message.server
@@ -57,7 +53,7 @@ class countrycode:
                     await self.bot.say(
                         "The boys and girls from " + result['name'] + " will miss you " + user.mention + "! :(")
                 else:
-                    await self.bot.say("You already removed that country as your countryorigin!")
+                    await self.bot.say("You already removed that country as your country origin!")
             else:
                 await self.bot.say("Sorry I don't know your country! Did you use the correct ISO countrycode?")
         except:
