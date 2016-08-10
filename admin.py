@@ -275,7 +275,7 @@ class Admin:
             await self.bot.say("Role removed.")
 
     @commands.command(no_pm=True, pass_context=True)
-    @checks.mod_or_permissions(administrator = True, moderator = True) 
+    @checks.mod_or_permissions(administrator = True, moderator = True)
     async def say(self, ctx, *, text):
         """Repeats what you tell it.
 
