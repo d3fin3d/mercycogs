@@ -9,7 +9,7 @@ class countrycode:
         self.bot = bot
 
     @commands.command(pass_context=True, no_pm=True)
-    async def addcountry(self, ctx, country: str):
+    async def country(self, ctx, country: str):
 
         server = ctx.message.server
         user = ctx.message.author
