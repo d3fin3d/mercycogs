@@ -6,16 +6,7 @@ from .utils import checks
 import os
 
 defaults = [
-    "Twentysix's Floppy Disk",
-    "Eslyium's Hentai Collection",
-    "A Nuke",
-    "A Loaf Of Bread",
-    "My Hand",
-    "Will's SquidBot",
-    "JennJenn's Penguin Army",
-    "Red's Transistor",
-    "Asu\u10e6's Wrath",
-    "Skordy's Keyboard"]
+    ]
 
 class Slap:
     """Slap command."""
@@ -53,7 +44,6 @@ class Slap:
           await self.bot.say("Item added.")
 
     @slap.command()
-    @checks.is_owner()
     async def remove(self, item):
         """Removes item"""
         if item not in self.items:
@@ -62,6 +52,15 @@ class Slap:
             self.items.remove(item)
             self.save_items()
             await self.bot.say("item removed.")
+
+    @slap.command()
+    async def list(self):
+        """list items"""
+        msg = ""
+        for item in self.items:
+            msg = msg + "\n• " + item
+        await self.bot.say(msg)
+
 
 def check_folders():
     if not os.path.exists("data/slap"):
