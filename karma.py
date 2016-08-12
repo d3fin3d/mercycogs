@@ -62,7 +62,7 @@ class Karma:
     async def karma(self, ctx):
         """Checks a user's karma, requires @ mention
 
-           Example: !karma @Red"""
+           Example: -karma @d3fin3d"""
         if len(ctx.message.mentions) != 1:
             await send_cmd_help(ctx)
             return
