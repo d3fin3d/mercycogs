@@ -1645,6 +1645,16 @@ class Audio:
 
         self._stop(server)
 
+    @commands.command(name="ytlist", pass_context=True, no_pm=True)
+    async def ytlist(self, ctx):
+        msg = ""
+        for (key, item) in self.queue.items():
+            for item2 in item['QUEUE']:
+                msg = msg + "\n• " + item2
+                msg = msg.replace("[SEARCH:]", "", 1)
+        await self.bot.say("Current YouTube search terms in queue:")
+        await self.bot.say(msg)
+
     @commands.command(name="yt", pass_context=True, no_pm=True)
     async def yt_search(self, ctx, *, search_terms: str):
         """Searches and plays a video from YouTube"""
