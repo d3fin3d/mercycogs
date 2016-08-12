@@ -342,9 +342,7 @@ class Audio:
             song_filename = os.path.join(self.cache_path, filename)
 
         use_avconv = self.settings["AVCONV"]
-        volume = self.get_server_settings(server)["VOLUME"] / 100
-        options = \
-            '-filter "volume=volume={}" -b:a 64k -bufsize 64k'.format(volume)
+        options = '-b:a 64k -bufsize 64k'
 
         try:
             voice_client.audio_player.process.kill()
@@ -358,6 +356,10 @@ class Audio:
 
         voice_client.audio_player = voice_client.create_ffmpeg_player(
             song_filename, use_avconv=use_avconv, options=options)
+
+        # Set initial volume
+        vol = self.get_server_settings(server)['VOLUME'] / 100
+        voice_client.audio_player.volume = vol
 
         return voice_client  # Just for ease of use, it's modified in-place
 
@@ -1012,17 +1014,28 @@ class Audio:
 
     @audioset.command(pass_context=True, name="volume", no_pm=True)
     @checks.mod_or_permissions(manage_messages=True)
-    async def audioset_volume(self, ctx, percent: int):
-        """Sets the volume (0 - 100)"""
+    async def audioset_volume(self, ctx, percent: int=None):
+        """Sets the volume (0 - 100)
+        Note: volume may be set up to 200 but you may experience clipping."""
         server = ctx.message.server
-        if percent >= 0 and percent <= 100:
+        if percent is None:
+            vol = self.get_server_settings(server)['VOLUME']
+            msg = "Volume is currently set to %d%%" % vol
+        elif percent >= 0 and percent <= 200:
             self.set_server_setting(server, "VOLUME", percent)
-            await self.bot.say("Volume is now set at " + str(percent) +
-                               ". It will take effect after the current"
-                               " track.")
+            msg = "Volume is now set to %d." % percent
+            if percent > 100:
+                msg += "\nWarning: volume levels above 100 may result in clipping"
+
+            # Set volume of playing audio
+            vc = self.voice_client(server)
+            if vc:
+                vc.audio_player.volume = percent / 100
+
             self.save_settings()
         else:
-            await self.bot.say("Volume must be between 0 and 100.")
+            msg = "Volume must be between 0 and 100."
+        await self.bot.say(msg)
 
     @audioset.command(pass_context=True, name="vote", no_pm=True,
                       hidden=True, enabled=False)
@@ -1276,6 +1289,29 @@ class Audio:
         """Playlist management/control."""
         if ctx.invoked_subcommand is None:
             await send_cmd_help(ctx)
+
+    @playlist.command(pass_context=True, no_pm=True, name="create")
+    async def playlist_create(self, ctx, name):
+        """Creates an empty playlist"""
+        server = ctx.message.server
+        author = ctx.message.author
+        if not self._valid_playlist_name(name) or len(name) > 25:
+            await self.bot.say("That playlist name is invalid. It must only"
+                               " contain alpha-numeric characters or _.")
+            return
+
+        # Returns a Playlist object
+        url = None
+        songlist = []
+        playlist = self._make_playlist(author, url, songlist)
+
+        playlist.name = name
+        playlist.server = server
+
+        self._save_playlist(server, name, playlist)
+        await self.bot.say("Empty playlist '{}' saved.".format(name))
+
+
 
     @playlist.command(pass_context=True, no_pm=True, name="add")
     async def playlist_add(self, ctx, name, url):
@@ -1644,15 +1680,6 @@ class Audio:
         server = ctx.message.server
 
         self._stop(server)
-
-    @commands.command(name="ytlist", pass_context=True, no_pm=True)
-    async def ytlist(self, ctx):
-        msg = "Current YouTube search terms in queue:"
-        for (key, item) in self.queue.items():
-            for item2 in item['QUEUE']:
-                msg = msg + "\n• " + item2
-                msg = msg.replace("[SEARCH:]", "", 1)
-        await self.bot.say(msg)
 
     @commands.command(name="yt", pass_context=True, no_pm=True)
     async def yt_search(self, ctx, *, search_terms: str):
