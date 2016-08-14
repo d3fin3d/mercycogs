@@ -1681,7 +1681,7 @@ class Audio:
 
         self._stop(server)
 
-    @commands.command(name="ytlist", pass_context=True, no_pm=True)
+    @commands.command(name="ytlist", pass_context=True, no_pm=True) 
     async def ytlist(self, ctx):
         msg = "Current YouTube search terms in queue:"
         for (key, item) in self.queue.items():
