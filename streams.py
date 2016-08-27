@@ -15,7 +15,7 @@ import logging
 class Streams:
     """Streams
 
-    Twitch, Hitbox and Beam alerts"""
+    Twitch, Hitbox, Youtube and Beam alerts"""
 
     def __init__(self, bot):
         self.bot = bot
