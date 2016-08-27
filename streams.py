@@ -22,12 +22,10 @@ class Streams:
         self.twitch_streams = fileIO("data/streams/twitch.json", "load")
         self.hitbox_streams = fileIO("data/streams/hitbox.json", "load")
         self.beam_streams = fileIO("data/streams/beam.json", "load")
-<<<<<<< HEAD
         self.settings = fileIO("data/streams/settings.json", "load")
-=======
         self.youtube_streams = fileIO("data/streams/youtube.json", "load")
         self.api = "AIzaSyAUO8P24PsGAAJpr7e4N3pL9Mhx6qL4YNs"
->>>>>>> b53a10a8c16a1a509b1e079136cdf2a92f934068
+
 
     @commands.command()
     async def hitbox(self, stream: str):
