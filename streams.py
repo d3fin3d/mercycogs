@@ -392,7 +392,7 @@ class Streams:
 
 
             for stream in self.youtube_streams:
-                online = await self.youtube_online(stream["NAME"])
+                online = await self.youtube_online(stream["NAME"], self.api)
                 if online[0] is True and not stream["ALREADY_ONLINE"]:
                     stream["ALREADY_ONLINE"] = True
                     for channel in stream["CHANNELS"]:
