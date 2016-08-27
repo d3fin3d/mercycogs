@@ -22,7 +22,12 @@ class Streams:
         self.twitch_streams = fileIO("data/streams/twitch.json", "load")
         self.hitbox_streams = fileIO("data/streams/hitbox.json", "load")
         self.beam_streams = fileIO("data/streams/beam.json", "load")
+<<<<<<< HEAD
         self.settings = fileIO("data/streams/settings.json", "load")
+=======
+        self.youtube_streams = fileIO("data/streams/youtube.json", "load")
+        self.api = "AIzaSyAUO8P24PsGAAJpr7e4N3pL9Mhx6qL4YNs"
+>>>>>>> b53a10a8c16a1a509b1e079136cdf2a92f934068
 
     @commands.command()
     async def hitbox(self, stream: str):
@@ -50,6 +55,21 @@ class Streams:
         elif online is False:
             await self.bot.say(stream + " is offline.")
         elif online is None:
+            await self.bot.say("That stream doesn't exist.")
+        else:
+            await self.bot.say("Error.")
+
+    @commands.command()
+    async def youtube(self, channelid: str):
+        """Checks if youtube stream is online"""
+        channelid = escape_mass_mentions(channelid)
+        online = await self.youtube_online(channelid, self.api)
+        if online[0] is True:
+            await self.bot.say("https://gaming.youtube.com/channel/{} "
+                               "is online!".format(channelid))
+        elif online[0] is False:
+            await self.bot.say(channelid + " is offline.")
+        elif online[0] is None:
             await self.bot.say("That stream doesn't exist.")
         else:
             await self.bot.say("Error.")
@@ -118,6 +138,50 @@ class Streams:
                                "everytime {} is live.".format(stream))
 
         fileIO("data/streams/twitch.json", "save", self.twitch_streams)
+
+    @streamalert.command(name="youtube", pass_context=True)
+    async def youtube_alert(self, ctx, stream: str):
+        """Adds/removes youtube alerts from the current channel"""
+        stream = escape_mass_mentions(stream)
+        channel = ctx.message.channel
+        check = await self.youtube_online(stream, self.api)
+        if check is None:
+            await self.bot.say("That stream doesn't exist.")
+            return
+        elif check == "error":
+            await self.bot.say("Couldn't contact Twitch API. Try again later.")
+            return
+
+        done = False
+
+        for i, s in enumerate(self.youtube_streams):
+            if s["NAME"] == stream:
+                if channel.id in s["CHANNELS"]:
+                    if len(s["CHANNELS"]) == 1:
+                        self.youtube_streams.remove(s)
+                        await self.bot.say("Alert has been removed "
+                                           "from this channel.")
+                        done = True
+                    else:
+                        self.youtube_streams[i]["CHANNELS"].remove(channel.id)
+                        await self.bot.say("Alert has been removed "
+                                           "from this channel.")
+                        done = True
+                else:
+                    self.youtube_streams[i]["CHANNELS"].append(channel.id)
+                    await self.bot.say("Alert activated. I will notify this " +
+                                       "channel everytime {}".format(check[1]) +
+                                       " is live.")
+                    done = True
+
+        if not done:
+            self.youtube_streams.append(
+                {"CHANNELS": [channel.id],
+                 "NAME": stream, "ALREADY_ONLINE": False})
+            await self.bot.say("Alert activated. I will notify this channel "
+                               "everytime {} is live.".format(stream))
+
+        fileIO("data/streams/youtube.json", "save", self.youtube_streams)
 
     @streamalert.command(name="hitbox", pass_context=True)
     async def hitbox_alert(self, ctx, stream: str):
@@ -299,6 +363,19 @@ class Streams:
             return "error"
         return "error"
 
+    async def youtube_online(self, stream, api):
+        url = "https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=" + stream + "&type=video&eventType=live&key=" + api
+        try:
+            async with aiohttp.get(url) as r:
+                data = await r.json()
+            if len(data["items"]) > 0:
+                return True, data['items'][0]['snippet']['channelTitle']
+            else:
+                return False, ""
+        except:
+            return "error", ""
+        return "error", ""
+
     async def beam_online(self, stream):
         url = "https://beam.pro/api/v1/channels/" + stream
         try:
@@ -411,6 +488,11 @@ def check_files():
     f = "data/streams/twitch.json"
     if not fileIO(f, "check"):
         print("Creating empty twitch.json...")
+        fileIO(f, "save", [])
+
+    f = "data/streams/youtube.json"
+    if not fileIO(f, "check"):
+        print("Creating empty youtube.json...")
         fileIO(f, "save", [])
 
     f = "data/streams/hitbox.json"
