@@ -410,6 +410,26 @@ class Streams:
             old = (deepcopy(self.twitch_streams), deepcopy(
                 self.hitbox_streams), deepcopy(self.beam_streams))
 
+
+            for stream in self.youtube_streams:
+                online = await self.youtube_online(stream["NAME"])
+                if online[0] is True and not stream["ALREADY_ONLINE"]:
+                    stream["ALREADY_ONLINE"] = True
+                    for channel in stream["CHANNELS"]:
+                        channel_obj = self.bot.get_channel(channel)
+                        if channel_obj is None:
+                            continue
+                        can_speak = channel_obj.permissions_for(channel_obj.server.me).send_messages
+                        if channel_obj and can_speak:
+                            await self.bot.send_message(
+                                self.bot.get_channel(channel),
+                                "https://gaming.youtube.com/channel/"
+                                "{} is online!".format(stream["NAME"]))
+                else:
+                    if stream["ALREADY_ONLINE"] and not online[0]:
+                        stream["ALREADY_ONLINE"] = False
+                await asyncio.sleep(0.5)
+
             for stream in self.twitch_streams:
                 online = await self.twitch_online(stream["NAME"])
                 if online is True and not stream["ALREADY_ONLINE"]:
