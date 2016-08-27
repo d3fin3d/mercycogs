@@ -68,13 +68,15 @@ class Owner:
             log.exception(e)
             traceback.print_exc()
             await self.bot.say("There was an issue loading the module. Check"
-                               " your console or logs for more information.")
+                               " your console or logs for more information.\n"
+                               "\nError: `{}`".format(e.args[0]))
         except Exception as e:
             log.exception(e)
             traceback.print_exc()
             await self.bot.say('Module was found and possibly loaded but '
                                'something went wrong. Check your console '
-                               'or logs for more information.')
+                               'or logs for more information.\n\n'
+                               'Error: `{}`'.format(e.args[0]))
         else:
             set_cog(module, True)
             await self.disable_commands()
@@ -154,7 +156,8 @@ class Owner:
             log.exception(e)
             traceback.print_exc()
             await self.bot.say("That module could not be loaded. Check your"
-                               " console or logs for more information.")
+                               " console or logs for more information.\n\n"
+                               "Error: `{}`".format(e.args[0]))
         else:
             set_cog(module, True)
             await self.disable_commands()
@@ -222,15 +225,16 @@ class Owner:
                              args=(ctx.message.author,))
         t.start()
 
-    @_set.command()
+    @_set.command(pass_context=True)
     @checks.is_owner()
-    async def prefix(self, *prefixes):
-        """Sets prefixes
+    async def prefix(self, ctx, *prefixes):
+        """Sets Red's prefixes
 
-        Must be separated by a space. Enclose in double
-        quotes if a prefix contains spaces."""
+        Accepts multiple prefixes separated by a space. Enclose in double
+        quotes if a prefix contains spaces.
+        Example: set prefix ! $ ? "two words" """
         if prefixes == ():
-            await self.bot.say("Example: setprefix [ ! ^ .")
+            await send_cmd_help(ctx)
             return
 
         self.bot.command_prefix = sorted(prefixes, reverse=True)
@@ -476,11 +480,13 @@ class Owner:
             await self.bot.send_message(owner, message)
         except discord.errors.InvalidArgument:
             await self.bot.say("I cannot send your message, I'm unable to find"
-                               "my owner... *sigh*")
+                               " my owner... *sigh*")
         except discord.errors.HTTPException:
             await self.bot.say("Your message is too long.")
         except:
             await self.bot.say("I'm unable to deliver your message. Sorry.")
+        else:
+            await self.bot.say("Your message has been sent.")
 
     @commands.command()
     async def info(self):
