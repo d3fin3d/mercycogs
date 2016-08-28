@@ -417,9 +417,6 @@ class Streams:
 
     async def stream_checker(self):
         CHECK_DELAY = 60
-        await self.bot.send_message(
-            self.bot.get_channel("185833952278347793"),
-            "check start!".format("test"))
 
         while self == self.bot.get_cog("Streams"):
 
