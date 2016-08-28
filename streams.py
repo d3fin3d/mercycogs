@@ -506,9 +506,6 @@ class Streams:
                 fileIO("data/streams/hitbox.json", "save", self.hitbox_streams)
                 fileIO("data/streams/beam.json", "save", self.beam_streams)
                 fileIO("data/streams/youtube.json", "save", self.beam_streams)
-            await self.bot.send_message(
-                self.bot.get_channel("185833952278347793"),
-                "check end!".format("test"))
             await asyncio.sleep(CHECK_DELAY)
 
 
