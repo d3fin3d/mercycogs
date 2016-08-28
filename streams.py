@@ -62,12 +62,12 @@ class Streams:
         """Checks if youtube stream is online"""
         channelid = escape_mass_mentions(channelid)
         online = await self.youtube_online(channelid, self.api)
-        if online[0] is True:
+        if online is True:
             await self.bot.say("https://gaming.youtube.com/channel/{} "
                                "is online!".format(channelid))
-        elif online[0] is False:
+        elif online is False:
             await self.bot.say(channelid + " is offline.")
-        elif online[0] is None:
+        elif online is None:
             await self.bot.say("That stream doesn't exist.")
         else:
             await self.bot.say("Error.")
@@ -300,6 +300,18 @@ class Streams:
 
         to_delete = []
 
+        for s in self.youtube_streams:
+            if channel.id in s["CHANNELS"]:
+                if len(s["CHANNELS"]) == 1:
+                    to_delete.append(s)
+                else:
+                    s["CHANNELS"].remove(channel.id)
+
+        for s in to_delete:
+            self.youtube_streams.remove(s)
+
+        to_delete = []
+
         for s in self.beam_streams:
             if channel.id in s["CHANNELS"]:
                 if len(s["CHANNELS"]) == 1:
@@ -313,6 +325,7 @@ class Streams:
         fileIO("data/streams/twitch.json", "save", self.twitch_streams)
         fileIO("data/streams/hitbox.json", "save", self.hitbox_streams)
         fileIO("data/streams/beam.json", "save", self.beam_streams)
+        fileIO("data/streams/youtube.json", "save", self.youtube_streams)
 
         await self.bot.say("There will be no more stream alerts in this "
                            "channel.")
@@ -367,12 +380,12 @@ class Streams:
             async with aiohttp.get(url) as r:
                 data = await r.json()
             if len(data["items"]) > 0:
-                return True, data['items'][0]['snippet']['channelTitle']
+                return True
             else:
-                return False, ""
+                return False
         except:
-            return "error", ""
-        return "error", ""
+            return "error"
+        return "error"
 
     async def beam_online(self, stream):
         url = "https://beam.pro/api/v1/channels/" + stream
@@ -404,6 +417,9 @@ class Streams:
 
     async def stream_checker(self):
         CHECK_DELAY = 60
+        await self.bot.send_message(
+            self.bot.get_channel("185833952278347793"),
+            "check start!".format("test"))
 
         while self == self.bot.get_cog("Streams"):
 
@@ -413,7 +429,7 @@ class Streams:
 
             for stream in self.youtube_streams:
                 online = await self.youtube_online(stream["NAME"], self.api)
-                if online[0] is True and not stream["ALREADY_ONLINE"]:
+                if online is True and not stream["ALREADY_ONLINE"]:
                     stream["ALREADY_ONLINE"] = True
                     for channel in stream["CHANNELS"]:
                         channel_obj = self.bot.get_channel(channel)
@@ -426,7 +442,7 @@ class Streams:
                                 "https://gaming.youtube.com/channel/"
                                 "{} is online!".format(stream["NAME"]))
                 else:
-                    if stream["ALREADY_ONLINE"] and not online[0]:
+                    if stream["ALREADY_ONLINE"] and not online:
                         stream["ALREADY_ONLINE"] = False
                 await asyncio.sleep(0.5)
 
@@ -488,11 +504,14 @@ class Streams:
                 await asyncio.sleep(0.5)
 
             if old != (self.twitch_streams, self.hitbox_streams,
-                       self.beam_streams):
+                       self.beam_streams, self.youtube_streams):
                 fileIO("data/streams/twitch.json", "save", self.twitch_streams)
                 fileIO("data/streams/hitbox.json", "save", self.hitbox_streams)
                 fileIO("data/streams/beam.json", "save", self.beam_streams)
-
+                fileIO("data/streams/youtube.json", "save", self.beam_streams)
+            await self.bot.send_message(
+                self.bot.get_channel("185833952278347793"),
+                "check end!".format("test"))
             await asyncio.sleep(CHECK_DELAY)
 
 
