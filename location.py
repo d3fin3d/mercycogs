@@ -3,6 +3,8 @@ import json
 import requests
 from discord.ext import commands
 from cogs.utils import checks
+import pycountry
+import re
 
 class countrycode:
 
@@ -16,24 +18,54 @@ class countrycode:
         user = ctx.message.author
         perms = discord.Permissions.none()
 
-        response = requests.get("https://restcountries.eu/rest/v1/alpha/" + country)
-        result = response.json()
+        re1 = '((?:[a-z][a-z]+))'  # Word 1
+        re2 = '.*?'  # Non-greedy match on filler
+        re3 = '((?:[a-z][a-z]+))'  # Word 2
+        rg = re.compile(re1 + re2 + re3, re.IGNORECASE | re.DOTALL)
+
+        m = rg.search(country)
+        subregionobj = None
+        try:
+            if m:
+                word1 = m.group(1)
+                countryobj = pycountry.countries.get(alpha2=word1.upper())
+                subregionobj = pycountry.subdivisions.get(code=country.upper())
+            else:
+                countryobj = pycountry.countries.get(alpha2=country.upper())
+        except:
+            countryobj = None
         easter = "shithole";
 
-        if response.status_code != 404:
-            msg = "All members for " + result['name'] + " :flag_"+ result['alpha2Code'].lower() +":\n```"
-            try:
-                for member in server._members:
-                    for role in server._members[member].roles:
-                        if result['name'] == role.name:
-                            msg = msg + "\n• " + server._members[member].name
-                msg = msg + "```"
-                if msg != "All members for " + result['name'] + " :flag_"+ result['alpha2Code'].lower() +":\n``````":
-                    await self.bot.say(msg)
-                else:
-                    await self.bot.say("No one found in " + result['name'] + " :flag_"+ result['alpha2Code'].lower() +": :(")
-            except:
-                await self.bot.say("w00ps, something went wrong! :( Please try again.")
+        if countryobj is not None:
+            if subregionobj is not None:
+                msg = "All members for " + countryobj.name + ": " + subregionobj.name + " :flag_" + countryobj.alpha2.lower() + ":\n```"
+                try:
+                    for member in server._members:
+                        for role in server._members[member].roles:
+                            if subregionobj.code == role.name:
+                                msg = msg + "\n• " + server._members[member].name
+                    msg = msg + "```"
+                    if msg != "All members for " + countryobj.name + ": " + subregionobj.name + " :flag_" + countryobj.alpha2.lower().lower() + ":\n``````":
+                        await self.bot.say(msg)
+                    else:
+                        await self.bot.say(
+                            "No one found in " + countryobj.name + ": " + subregionobj.name + " :flag_" + countryobj.alpha2.lower().lower() + ": :(")
+                except:
+                    await self.bot.say("w00ps, something went wrong! :( Please try again.")
+            else:
+                msg = "All members for " + countryobj.name + " :flag_"+ countryobj.alpha2.lower() +":\n```"
+                try:
+                    for member in server._members:
+                        for role in server._members[member].roles:
+                            if countryobj.name == role.name:
+                                msg = msg + "\n• " + server._members[member].name
+                    msg = msg + "```"
+                    if msg != "All members for " + countryobj.name + " :flag_"+ countryobj.alpha2.lower() +":\n``````":
+                        await self.bot.say(msg)
+                    else:
+                        await self.bot.say("No one found in " + countryobj.name + " :flag_"+ countryobj.alpha2.lower() +": :(")
+                except:
+                    await self.bot.say("w00ps, something went wrong! :( Please try again.")
         else:
             if country.lower() == easter:
                 msg = "All members for SHITHOLE :poop: : \n```•SpiritoftheWest#4290```"
