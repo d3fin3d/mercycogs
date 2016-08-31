@@ -63,7 +63,7 @@ class countrycode:
                 await self.bot.say("w00ps, something went wrong! :( Please try again.")
         else:
             await self.bot.say(
-                "Sorry I don't know your country! Did you use the correct ISO countrycode? \nExample: `-country GB`")
+                "Sorry I don't know your country! Did you use the correct ISO countrycode? \nExample: `-country GB` or `-country US-CA for california`")
 
     @commands.command(pass_context=True, no_pm=True)
     async def removecountry(self, ctx, country: str):

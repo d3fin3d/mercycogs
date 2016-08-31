@@ -60,7 +60,7 @@ class timezone:
                 await self.timecheck(countryobj.alpha2)
         else:
             await self.bot.say(
-                "Sorry I don't know your country! Did you use the correct ISO countrycode? \nExample: `-time GB`\n`-time US-CA`")
+                "Sorry I don't know your country! Did you use the correct ISO countrycode? \nExample: `-localtime GB`\n`-localtime US-CA`")
 
     @localtime.command(name="user",pass_context=True)
     async def time(self, ctx, user: discord.Member = None):
