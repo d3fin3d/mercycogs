@@ -6,7 +6,7 @@ from cogs.utils import checks
 import pycountry
 import re
 
-class countrycode:
+class location:
 
     def __init__(self, bot):
         self.bot = bot
@@ -73,4 +73,4 @@ class countrycode:
             else:
                 await self.bot.say("Sorry I don't know your country! Did you use the correct ISO countrycode? \nExample: `-location GB`")
 def setup(bot):
-    bot.add_cog(countrycode(bot))
+    bot.add_cog(location(bot))
